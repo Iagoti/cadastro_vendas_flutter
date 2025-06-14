@@ -54,6 +54,9 @@ class _VendaListViewState extends State<VendaListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Lista de Vendas'),
+      ),
       body: Column(
         children: [
           Padding(
