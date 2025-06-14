@@ -36,14 +36,32 @@ class _VendaListViewState extends State<VendaListView> {
   Future<void> _carregarVendas() async {
     setState(() => _isLoading = true);
     try {
-      _vendas = await _vendaController.listarVendas();
-      _filtrarVendas();
+      final vendas = await _vendaController.listarVendas();
+      
+      if (vendas.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Nenhuma venda encontrada'),
+              behavior: SnackBarBehavior.fixed,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+
+      setState(() {
+        _vendas = vendas;
+        _filteredVendas = vendas;
+      });
     } catch (e) {
+      debugPrint('Erro no _carregarVendas: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao carregar vendas: $e'),
+            content: Text('Erro ao carregar vendas: ${e.toString()}'),
             behavior: SnackBarBehavior.fixed,
+            duration: const Duration(seconds: 4),
           ),
         );
       }

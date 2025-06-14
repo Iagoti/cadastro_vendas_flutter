@@ -19,6 +19,17 @@ class ProdutoModel {
     required this.tamanho,
   });
 
+  // Construtor para listagem de vendas
+  ProdutoModel.venda({
+    required this.cd_produto,
+    required this.nome,
+    required this.valorVenda,
+    required this.tamanho,
+  }) : dataCompra = '',
+       valorCompra = 0,
+       quantidade = 0,
+       cidadeCompra = '';
+
   Map<String, dynamic> toMap() {
     return {
       'cd_produto': cd_produto,

@@ -57,4 +57,22 @@ class VendaModel {
       parcelas: parcelas,
     );
   }
+
+  VendaModel copyWith({
+    List<ItemVendaModel>? itens,
+    List<ParcelaModel>? parcelas,
+  }) {
+    return VendaModel(
+      cd_venda: this.cd_venda,
+      cd_cliente: this.cd_cliente,
+      clienteNome: this.clienteNome,
+      data_venda: this.data_venda,
+      forma_pagamento: this.forma_pagamento,
+      entrada: this.entrada,
+      total: this.total,
+      quantidade_parcelas: this.quantidade_parcelas,
+      itens: itens ?? this.itens,
+      parcelas: parcelas ?? this.parcelas,
+    );
+  }
 }

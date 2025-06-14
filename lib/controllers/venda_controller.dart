@@ -12,11 +12,11 @@ class VendaController {
 
   Future<List<VendaModel>> listarVendas() async {
     try {
-      return await _service.listarVendas();
-    } catch (e, stackTrace) {
-      print('Erro ao listar vendas: $e');
-      print('StackTrace: $stackTrace');
-      rethrow;
+      final vendas = await _service.listarVendas();
+      return vendas;
+    } catch (e) {
+      print('Erro no VendaController.listarVendas: $e');
+      return []; // Retorna lista vazia em caso de erro
     }
   }
 

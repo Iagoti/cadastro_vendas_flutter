@@ -40,36 +40,49 @@ class VendaRepository {
     });
   }
 
-  Future<List<Map<String, dynamic>>> listarVendasBase() async {
+  Future<List<Map<String, dynamic>>> listarVendasCompletas() async {
     final db = await _dbService.database;
-    return await db.rawQuery('''
-      SELECT v.*, c.nome as cliente_nome 
+    
+    final query = '''
+      SELECT 
+        v.cd_venda,
+        v.data_venda,
+        v.forma_pagamento,
+        v.entrada,
+        v.total,
+        v.quantidade_parcelas,
+        
+        -- Dados do cliente
+        c.cd_cliente,
+        c.nome as cliente_nome,
+        
+        -- Itens da venda
+        iv.cd_produto,
+        iv.quantidade as item_quantidade,
+        iv.valor_unitario,
+        
+        -- Dados do produto
+        p.nome as produto_nome,
+        p.valor_venda,
+        p.tamanho,
+        
+        -- Parcelas
+        parc.cd_parcela,
+        parc.numero_parcela,
+        parc.valor_parcela,
+        parc.data_vencimento,
+        parc.data_pagamento,
+        parc.pago
       FROM venda v
       JOIN cliente c ON v.cd_cliente = c.cd_cliente
-      ORDER BY v.data_venda DESC
-    ''');
+      LEFT JOIN item_venda iv ON v.cd_venda = iv.cd_venda
+      LEFT JOIN produto p ON iv.cd_produto = p.cd_produto
+      LEFT JOIN parcela parc ON v.cd_venda = parc.cd_venda
+      ORDER BY v.data_venda DESC, parc.numero_parcela ASC
+    ''';
+    
+    return await db.rawQuery(query);
   }
-
-  Future<List<Map<String, dynamic>>> listarItensVenda(int cdVenda) async {
-    final db = await _dbService.database;
-    return await db.rawQuery('''
-      SELECT iv.*, p.*
-      FROM item_venda iv
-      JOIN produto p ON iv.cd_produto = p.cd_produto
-      WHERE iv.cd_venda = ?
-    ''', [cdVenda]);
-  }
-
-  Future<List<Map<String, dynamic>>> listarParcelasVenda(int cdVenda) async {
-    final db = await _dbService.database;
-    return await db.query(
-      'parcela',
-      where: 'cd_venda = ?',
-      whereArgs: [cdVenda],
-      orderBy: 'numero_parcela',
-    );
-  }
-
 
   Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
     final db = await _dbService.database;
