@@ -1,18 +1,3 @@
-import 'package:cadastro_vendas_flutter/models/produto_model.dart';
-import 'package:cadastro_vendas_flutter/repositories/cliente_repository.dart';
-import 'package:cadastro_vendas_flutter/repositories/produto_repository.dart';
-import 'package:cadastro_vendas_flutter/repositories/venda_repository.dart';
-import 'package:cadastro_vendas_flutter/services/cliente_service.dart';
-import 'package:cadastro_vendas_flutter/services/produto_service.dart';
-import 'package:cadastro_vendas_flutter/services/venda_service.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../models/venda_model.dart';
-import '../../models/item_venda_model.dart';
-import '../../models/parcela_model.dart';
-import '../../controllers/venda_controller.dart';
-import '../../controllers/produto_controller.dart';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/cliente_controller.dart';
@@ -21,7 +6,14 @@ import '../../controllers/venda_controller.dart';
 import '../../models/cliente_model.dart';
 import '../../models/item_venda_model.dart';
 import '../../models/parcela_model.dart';
+import '../../models/produto_model.dart';
 import '../../models/venda_model.dart';
+import '../../repositories/cliente_repository.dart';
+import '../../repositories/produto_repository.dart';
+import '../../repositories/venda_repository.dart';
+import '../../services/cliente_service.dart';
+import '../../services/produto_service.dart';
+import '../../services/venda_service.dart';
 
 class VendaCreateView extends StatefulWidget {
   const VendaCreateView({super.key});
@@ -87,7 +79,7 @@ class _VendaCreateViewState extends State<VendaCreateView> {
   Future<void> _adicionarProduto() async {
     final produto = await showDialog<ItemVendaModel>(
       context: context,
-      builder: (context) => const AdicionarProdutoDialog(),
+      builder: (context) => AdicionarProdutoDialog(produtoController: _produtoController),
     );
     
     if (produto != null) {
@@ -130,80 +122,79 @@ class _VendaCreateViewState extends State<VendaCreateView> {
   }
   
   Future<void> _salvarVenda() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_itens.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Adicione pelo menos um produto')),
-      );
-      return;
-    }
+  if (!_formKey.currentState!.validate()) return;
+  if (_itens.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Adicione pelo menos um produto')),
+    );
+    return;
+  }
+  
+  if (_clienteSelecionado == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Selecione um cliente válido')),
+    );
+    return;
+  }
+  
+  final venda = VendaModel(
+    cd_cliente: _clienteSelecionado!.cd_cliente!,
+    clienteNome: _clienteSelecionado!.nome,
+    data_venda: _dataVenda,
+    forma_pagamento: _formaPagamentoController.text,
+    entrada: double.tryParse(_entradaController.text) ?? 0,
+    total: _total,
+    quantidade_parcelas: int.tryParse(_parcelasController.text) ?? 1,
+    itens: _itens,
+    parcelas: _parcelas,
+  );
+  
+  try {
+    await _vendaController.cadastrarVenda(venda);
     
-    if (_clienteSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um cliente válido')),
-      );
-      return;
-    }
-    
-    final venda = VendaModel(
-      cd_cliente: _clienteSelecionado!.cd_cliente!,
-      clienteNome: _clienteSelecionado!.nome,
-      data_venda: _dataVenda,
-      forma_pagamento: _formaPagamentoController.text,
-      data_pagamento: _dataPagamento,
-      entrada: double.tryParse(_entradaController.text) ?? 0,
-      total: _total,
-      itens: _itens,
-      parcelas: _parcelas,
+    final continuar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Venda salva com sucesso!'),
+        content: const Text('Deseja realizar outra venda?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Não'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sim'),
+          ),
+        ],
+      ),
     );
     
-    try {
-      await _vendaController.cadastrarVenda(venda);
-      
-      final continuar = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Venda salva com sucesso!'),
-          content: const Text('Deseja realizar outra venda?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Não'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Sim'),
-            ),
-          ],
-        ),
-      );
-      
-      if (continuar == true) {
-        setState(() {
-          _clienteTextController.clear();
-          _clienteSelecionado = null;
-          _formaPagamentoController.clear();
-          _entradaController.text = '0';
-          _parcelasController.text = '1';
-          _dataVenda = DateTime.now();
-          _dataPagamento = null;
-          _itens.clear();
-          _parcelas.clear();
-          _total = 0;
-        });
-      } else {
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/vendas');
-        }
-      }
-    } catch (e) {
+    if (continuar == true) {
+      setState(() {
+        _clienteTextController.clear();
+        _clienteSelecionado = null;
+        _formaPagamentoController.clear();
+        _entradaController.text = '0';
+        _parcelasController.text = '1';
+        _dataVenda = DateTime.now();
+        _itens.clear();
+        _parcelas.clear();
+        _total = 0;
+      });
+    } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar venda: $e')),
-        );
+        Navigator.pushReplacementNamed(context, '/vendas');
       }
     }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar venda: $e')),
+      );
+    }
   }
+}
   
   @override
   Widget build(BuildContext context) {
@@ -373,8 +364,14 @@ class _VendaCreateViewState extends State<VendaCreateView> {
                   itemBuilder: (context, index) {
                     final item = _itens[index];
                     return ListTile(
-                      title: Text(item.produtoNome),
-                      subtitle: Text('${item.quantidade} x ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(item.valor_unitario)}'),
+                      title: Text(item.produto.nome),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Tamanho: ${item.produto.tamanho}'),
+                          Text('${item.quantidade} x ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(item.valor_unitario)}'),
+                        ],
+                      ),
                       trailing: Text(NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(item.quantidade * item.valor_unitario)),
                       onLongPress: () {
                         setState(() {
@@ -425,40 +422,25 @@ class _VendaCreateViewState extends State<VendaCreateView> {
 }
 
 class AdicionarProdutoDialog extends StatefulWidget {
-  const AdicionarProdutoDialog({super.key});
+  final ProdutoController produtoController;
+
+  const AdicionarProdutoDialog({
+    super.key,
+    required this.produtoController,
+  });
 
   @override
   _AdicionarProdutoDialogState createState() => _AdicionarProdutoDialogState();
 }
 
 class _AdicionarProdutoDialogState extends State<AdicionarProdutoDialog> {
-  late TextEditingController _produtoController;
   final _quantidadeController = TextEditingController(text: '1');
-  final _valorController = TextEditingController();
-  final _produtoControllerInstance = ProdutoController(ProdutoService(ProdutoRepository()));
-  List<ProdutoModel> _produtos = [];
   ProdutoModel? _produtoSelecionado;
-  String? _produtoNome;
-  double? _produtoValor;
-
-  @override
-  void initState() {
-    super.initState();
-    _produtoController = TextEditingController();
-    _carregarProdutos();
-  }
 
   @override
   void dispose() {
-    _produtoController.dispose();
     _quantidadeController.dispose();
-    _valorController.dispose();
     super.dispose();
-  }
-
-  Future<void> _carregarProdutos() async {
-    _produtos = await _produtoControllerInstance.listarProdutos();
-    setState(() {});
   }
 
   @override
@@ -469,37 +451,72 @@ class _AdicionarProdutoDialogState extends State<AdicionarProdutoDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Autocomplete<ProdutoModel>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return _produtos.where((produto) => 
-                  produto.nome.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+            RawAutocomplete<ProdutoModel>(
+              optionsBuilder: (TextEditingValue textEditingValue) async {
+                if (textEditingValue.text.isEmpty) {
+                  return const Iterable<ProdutoModel>.empty();
+                }
+                return await widget.produtoController.buscarProdutosPorNome(textEditingValue.text);
               },
               displayStringForOption: (option) => option.nome,
-              onSelected: (produto) {
-                setState(() {
-                  _produtoSelecionado = produto;
-                  _produtoNome = produto.nome;
-                  _produtoValor = produto.valorVenda;
-                  _valorController.text = produto.valorVenda.toString();
-                });
-              },
               fieldViewBuilder: (
-                context, 
-                controller, 
-                focusNode, 
-                onFieldSubmitted
+                BuildContext context,
+                TextEditingController textEditingController,
+                FocusNode focusNode,
+                VoidCallback onFieldSubmitted,
               ) {
                 return TextField(
-                  controller: controller,
+                  controller: textEditingController,
                   focusNode: focusNode,
                   decoration: const InputDecoration(
                     labelText: 'Produto',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    _produtoNome = value;
-                  },
                 );
+              },
+              optionsViewBuilder: (
+                BuildContext context,
+                AutocompleteOnSelected<ProdutoModel> onSelected,
+                Iterable<ProdutoModel> options,
+              ) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4.0,
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width - 32,
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final produto = options.elementAt(index);
+                          return ListTile(
+                            title: Text(produto.nome),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Tamanho: ${produto.tamanho}'),
+                                Text('Valor: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(produto.valorVenda)}'),
+                              ],
+                            ),
+                            onTap: () {
+                              onSelected(produto);
+                              setState(() {
+                                _produtoSelecionado = produto;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              onSelected: (ProdutoModel produto) {
+                setState(() {
+                  _produtoSelecionado = produto;
+                });
               },
             ),
             const SizedBox(height: 16),
@@ -511,18 +528,27 @@ class _AdicionarProdutoDialogState extends State<AdicionarProdutoDialog> {
               ),
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _valorController,
-              decoration: const InputDecoration(
-                labelText: 'Valor Unitário',
-                border: OutlineInputBorder(),
+            if (_produtoSelecionado != null) ...[
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _produtoSelecionado?.valorVenda.toString() ?? '',
+                decoration: const InputDecoration(
+                  labelText: 'Valor Venda',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                enabled: false,
               ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                _produtoValor = double.tryParse(value);
-              },
-            ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _produtoSelecionado?.tamanho ?? '',
+                decoration: const InputDecoration(
+                  labelText: 'Tamanho',
+                  border: OutlineInputBorder(),
+                ),
+                enabled: false,
+              ),
+            ],
           ],
         ),
       ),
@@ -533,27 +559,20 @@ class _AdicionarProdutoDialogState extends State<AdicionarProdutoDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            final quantidade = int.tryParse(_quantidadeController.text) ?? 1;
-            final valor = _produtoValor ?? double.tryParse(_valorController.text) ?? 0;
-            
-            if (_produtoNome == null || _produtoNome!.isEmpty) {
+            if (_produtoSelecionado == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Selecione ou digite um nome para o produto')),
+                const SnackBar(content: Text('Selecione um produto')),
               );
               return;
             }
 
-            if (valor <= 0) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Informe um valor válido para o produto')),
-              );
-              return;
-            }
+            final quantidade = int.tryParse(_quantidadeController.text) ?? 1;
+            final valor = _produtoSelecionado!.valorVenda;
 
             Navigator.pop(context, ItemVendaModel(
               cd_venda: 0,
-              cd_produto: _produtoSelecionado?.cd_produto ?? 0,
-              produtoNome: _produtoNome!,
+              cd_produto: _produtoSelecionado!.cd_produto!,
+              produto: _produtoSelecionado!,
               quantidade: quantidade,
               valor_unitario: valor,
             ));

@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+
 class ParcelaModel {
   final int? cd_parcela;
   final int cd_venda;
@@ -33,16 +34,16 @@ class ParcelaModel {
   }
 
   factory ParcelaModel.fromMap(Map<String, dynamic> map) {
-  return ParcelaModel(
-    cd_parcela: map['cd_parcela'],
-    cd_venda: map['cd_venda'],
-    numero_parcela: map['numero_parcela'],
-    valor_parcela: map['valor_parcela'] is int
-        ? (map['valor_parcela'] as int).toDouble()
-        : map['valor_parcela'],
-    data_vencimento: DateTime.parse(map['data_vencimento']),
-    pago: map['pago'] == 1 || map['pago'] == true,
-  );
-}
-
+    return ParcelaModel(
+      cd_parcela: map['cd_parcela'],
+      cd_venda: map['cd_venda'],
+      numero_parcela: map['numero_parcela'],
+      valor_parcela: map['valor_parcela'],
+      data_vencimento: DateFormat('yyyy-MM-dd').parse(map['data_vencimento']),
+      data_pagamento: map['data_pagamento'] != null 
+          ? DateFormat('yyyy-MM-dd').parse(map['data_pagamento']) 
+          : null,
+      pago: map['pago'] == 1,
+    );
+  }
 }

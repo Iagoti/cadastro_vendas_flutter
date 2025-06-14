@@ -150,6 +150,14 @@ class DashboardView extends StatelessWidget {
                   _recreateDatabase(context);
                 },
               ),
+              ListTile(
+                leading: Icon(Icons.build),
+                title: Text('Consulta SQL'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/sql-query');
+                },
+              ),
             Divider(),
             ListTile(
               leading: Icon(Icons.exit_to_app),

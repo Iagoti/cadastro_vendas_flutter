@@ -42,8 +42,8 @@ class DataBaseRepository {
     await db.insert(
       'usuario',
       {
-        'username': 'admin',
-        'password': 'admin', 
+        'username': '123',
+        'password': '123', 
       },
     );
     
@@ -60,6 +60,33 @@ class DataBaseRepository {
       )
     ''');
 
+    // Inserindo dois produtos
+      await db.insert(
+        'produto',
+        {
+          'nome': 'Camiseta Preta',
+          'data_compra': '2025-06-01',
+          'valor_compra': 25.00,
+          'valor_venda': 50.00,
+          'quantidade': 10,
+          'cidade_compra': 'São Paulo',
+          'tamanho': 'M',
+        },
+      );
+
+      await db.insert(
+        'produto',
+        {
+          'nome': 'Calça Jeans',
+          'data_compra': '2025-06-03',
+          'valor_compra': 40.00,
+          'valor_venda': 80.00,
+          'quantidade': 5,
+          'cidade_compra': 'Belo Horizonte',
+          'tamanho': 'G',
+        },
+      );
+
     await db.execute('''
       CREATE TABLE cliente (
         cd_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,14 +97,34 @@ class DataBaseRepository {
       )
     ''');
     
+    // Inserindo dois clientes
+    await db.insert(
+      'cliente',
+      {
+        'nome': 'João Silva',
+        'telefone': '11999999999',
+        'cpf': '12345678901',
+      },
+    );
+
+    await db.insert(
+      'cliente',
+      {
+        'nome': 'Maria Oliveira',
+        'telefone': '21988888888',
+        'cpf': '98765432100',
+      },
+    );
+
     await db.execute('''
       CREATE TABLE venda (
         cd_venda INTEGER PRIMARY KEY AUTOINCREMENT,
         cd_cliente INTEGER NOT NULL,
         data_venda TEXT NOT NULL,
         forma_pagamento TEXT NOT NULL,
-        data_pagamento TEXT,
         entrada REAL DEFAULT 0,
+        total REAL NOT NULL,
+        quantidade_parcelas INTEGER NOT NULL,
         FOREIGN KEY (cd_cliente) REFERENCES cliente (cd_cliente)
       )
     ''');
@@ -93,7 +140,7 @@ class DataBaseRepository {
         FOREIGN KEY (cd_produto) REFERENCES produto (cd_produto)
       )
     ''');
-    
+
     await db.execute('''
       CREATE TABLE parcela (
         cd_parcela INTEGER PRIMARY KEY AUTOINCREMENT,

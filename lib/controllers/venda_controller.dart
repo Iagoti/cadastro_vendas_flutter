@@ -11,7 +11,13 @@ class VendaController {
   }
 
   Future<List<VendaModel>> listarVendas() async {
-    return await _service.listarVendas();
+    try {
+      return await _service.listarVendas();
+    } catch (e, stackTrace) {
+      print('Erro ao listar vendas: $e');
+      print('StackTrace: $stackTrace');
+      rethrow;
+    }
   }
 
   Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {

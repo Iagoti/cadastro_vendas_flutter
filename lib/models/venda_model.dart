@@ -8,9 +8,9 @@ class VendaModel {
   final String clienteNome;
   final DateTime data_venda;
   final String forma_pagamento;
-  final DateTime? data_pagamento;
   final double entrada;
   final double total;
+  final int quantidade_parcelas;
   final List<ItemVendaModel> itens;
   final List<ParcelaModel> parcelas;
 
@@ -20,9 +20,9 @@ class VendaModel {
     required this.clienteNome,
     required this.data_venda,
     required this.forma_pagamento,
-    this.data_pagamento,
     required this.entrada,
     required this.total,
+    required this.quantidade_parcelas,
     required this.itens,
     required this.parcelas,
   });
@@ -33,10 +33,28 @@ class VendaModel {
       'cd_cliente': cd_cliente,
       'data_venda': DateFormat('yyyy-MM-dd').format(data_venda),
       'forma_pagamento': forma_pagamento,
-      'data_pagamento': data_pagamento != null 
-          ? DateFormat('yyyy-MM-dd').format(data_pagamento!) 
-          : null,
       'entrada': entrada,
+      'total': total,
+      'quantidade_parcelas': quantidade_parcelas,
     };
+  }
+
+  factory VendaModel.fromMap(Map<String, dynamic> map, {
+    required List<ItemVendaModel> itens,
+    required List<ParcelaModel> parcelas,
+    required String clienteNome,
+  }) {
+    return VendaModel(
+      cd_venda: map['cd_venda'],
+      cd_cliente: map['cd_cliente'],
+      clienteNome: clienteNome,
+      data_venda: DateFormat('yyyy-MM-dd').parse(map['data_venda']),
+      forma_pagamento: map['forma_pagamento'],
+      entrada: map['entrada'],
+      total: map['total'],
+      quantidade_parcelas: map['quantidade_parcelas'],
+      itens: itens,
+      parcelas: parcelas,
+    );
   }
 }
