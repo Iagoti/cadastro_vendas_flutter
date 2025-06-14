@@ -479,8 +479,8 @@ class _AdicionarProdutoDialogState extends State<AdicionarProdutoDialog> {
                 setState(() {
                   _produtoSelecionado = produto;
                   _produtoNome = produto.nome;
-                  _produtoValor = produto.valor;
-                  _valorController.text = produto.valor.toString();
+                  _produtoValor = produto.valorVenda;
+                  _valorController.text = produto.valorVenda.toString();
                 });
               },
               fieldViewBuilder: (

@@ -6,11 +6,31 @@ class ProdutoController {
 
   ProdutoController(this._service);
 
+  Future<int> salvarProduto(ProdutoModel produto) async {
+    try {
+      return await _service.salvarProduto(produto);
+    } catch (e) {
+      throw Exception('Falha ao salvar produto: ${e.toString()}');
+    }
+  }
+
+  Future<void> excluirProduto(int cdProduto) async {
+    try {
+      await _service.excluirProduto(cdProduto);
+    } catch (e) {
+      throw Exception('Falha ao excluir produto: ${e.toString()}');
+    }
+  }
+
   Future<List<ProdutoModel>> listarProdutos() async {
     return await _service.listarProdutos();
   }
 
-  Future<ProdutoModel?> obterProdutoPorId(int cdProduto) async {
-    return await _service.obterProdutoPorId(cdProduto);
+  Future<List<ProdutoModel>> buscarProdutosPorNome(String nome) async {
+    try {
+      return await _service.buscarProdutosPorNome(nome);
+    } catch (e) {
+      throw Exception('Falha ao buscar produtos: ${e.toString()}');
+    }
   }
 }

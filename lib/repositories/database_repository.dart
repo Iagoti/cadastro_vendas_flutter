@@ -51,7 +51,12 @@ class DataBaseRepository {
       CREATE TABLE produto (
         cd_produto INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
-        valor REAL NOT NULL
+        data_compra TEXT NOT NULL,
+        valor_compra REAL NOT NULL,
+        valor_venda REAL NOT NULL,
+        quantidade INTEGER NOT NULL,
+        cidade_compra TEXT NOT NULL,
+        tamanho TEXT NOT NULL
       )
     ''');
 

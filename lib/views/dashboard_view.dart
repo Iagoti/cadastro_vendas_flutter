@@ -99,6 +99,28 @@ class DashboardView extends StatelessWidget {
               ],
             ),
             ExpansionTile(
+              leading: Icon(Icons.production_quantity_limits),
+              title: Text('Produtos'),
+              children: [
+                ListTile(
+                  leading: Icon(Icons.list_alt),
+                  title: Text('Lista de Produtos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/lista-produtos');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.add),
+                  title: Text('Adicionar Produto'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/produto-form');
+                  },
+                ),
+              ],
+            ),
+            ExpansionTile(
               leading: Icon(Icons.point_of_sale),
               title: Text('Vendas'),
               children: [
