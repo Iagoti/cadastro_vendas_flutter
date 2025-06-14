@@ -110,11 +110,19 @@ class VendaService {
     }
   }
 
-  Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
-    try {
-      await _repository.registrarPagamentoParcela(cdParcela, dataPagamento);
-    } catch (e) {
-      throw Exception('Falha ao registrar pagamento: ${e.toString()}');
-    }
+  Future<void> atualizarVenda(VendaModel venda) async {
+  try {
+    await _repository.atualizarVenda(venda);
+  } catch (e) {
+    throw Exception('Falha ao atualizar venda: ${e.toString()}');
   }
+}
+
+Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
+  try {
+    await _repository.registrarPagamentoParcela(cdParcela, dataPagamento);
+  } catch (e) {
+    throw Exception('Falha ao registrar pagamento: ${e.toString()}');
+  }
+}
 }

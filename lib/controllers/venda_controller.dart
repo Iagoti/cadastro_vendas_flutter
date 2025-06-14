@@ -20,7 +20,11 @@ class VendaController {
     }
   }
 
-  Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
-    await _service.registrarPagamentoParcela(cdParcela, dataPagamento);
-  }
+  Future<void> atualizarVenda(VendaModel venda) async {
+  await _service.atualizarVenda(venda);
+}
+
+Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
+  await _service.registrarPagamentoParcela(cdParcela, dataPagamento);
+}
 }

@@ -84,13 +84,48 @@ class VendaRepository {
     return await db.rawQuery(query);
   }
 
+  Future<void> atualizarVenda(VendaModel venda) async {
+    final db = await _dbService.database;
+    await db.transaction((txn) async {
+      // Atualiza a venda principal
+      await txn.update(
+        'venda',
+        {
+          'forma_pagamento': venda.forma_pagamento,
+          'entrada': venda.entrada,
+          'total': venda.total,
+          'quantidade_parcelas': venda.quantidade_parcelas,
+        },
+        where: 'cd_venda = ?',
+        whereArgs: [venda.cd_venda],
+      );
+
+      // Remove itens antigos
+      await txn.delete(
+        'item_venda',
+        where: 'cd_venda = ?',
+        whereArgs: [venda.cd_venda],
+      );
+
+      // Adiciona novos itens
+      for (final item in venda.itens) {
+        await txn.insert('item_venda', {
+          'cd_venda': venda.cd_venda,
+          'cd_produto': item.cd_produto,
+          'quantidade': item.quantidade,
+          'valor_unitario': item.valor_unitario,
+        });
+      }
+    });
+  }
+
   Future<void> registrarPagamentoParcela(int cdParcela, DateTime dataPagamento) async {
     final db = await _dbService.database;
     await db.update(
       'parcela',
       {
-        'data_pagamento': DateFormat('yyyy-MM-dd').format(dataPagamento),
         'pago': 1,
+        'data_pagamento': DateFormat('yyyy-MM-dd').format(dataPagamento),
       },
       where: 'cd_parcela = ?',
       whereArgs: [cdParcela],

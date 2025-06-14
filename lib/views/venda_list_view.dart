@@ -1,6 +1,7 @@
 import 'package:cadastro_vendas_flutter/models/venda_model.dart';
 import 'package:cadastro_vendas_flutter/repositories/venda_repository.dart';
 import 'package:cadastro_vendas_flutter/services/venda_service.dart';
+import 'package:cadastro_vendas_flutter/views/venda_edit_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/venda_controller.dart';
@@ -180,8 +181,20 @@ class _VendaListViewState extends State<VendaListView> {
                             margin: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                             child: InkWell(
-                              onTap: () {
-                                // Navegar para detalhes da venda
+                              onTap: () async {
+                                final atualizado = await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VendaEditView(
+                                      venda: venda,
+                                      vendaController: _vendaController,
+                                    ),
+                                  ),
+                                );
+
+                                if (atualizado == true) {
+                                  _carregarVendas(); // Recarrega a lista se houve atualização
+                                }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(12),

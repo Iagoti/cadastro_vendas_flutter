@@ -19,6 +19,26 @@ class ParcelaModel {
     required this.pago,
   });
 
+  ParcelaModel copyWith({
+    int? cd_parcela,
+    int? cd_venda,
+    int? numero_parcela,
+    double? valor_parcela,
+    DateTime? data_vencimento,
+    DateTime? data_pagamento,
+    bool? pago,
+  }) {
+    return ParcelaModel(
+      cd_parcela: cd_parcela ?? this.cd_parcela,
+      cd_venda: cd_venda ?? this.cd_venda,
+      numero_parcela: numero_parcela ?? this.numero_parcela,
+      valor_parcela: valor_parcela ?? this.valor_parcela,
+      data_vencimento: data_vencimento ?? this.data_vencimento,
+      data_pagamento: data_pagamento ?? this.data_pagamento,
+      pago: pago ?? this.pago,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'cd_parcela': cd_parcela,
